@@ -10,7 +10,10 @@ class CategorySerializer(serializers.ModelSerializer):
 class BookSerializer(serializers.ModelSerializer):
     # cost = serializers.IntegerField(source ='price')
     price_after_tax = serializers.SerializerMethodField(method_name='calculate_tax')
-    category = CategorySerializer()
+    category = serializers.HyperlinkedRelatedField(
+        queryset = Category.objects.all(),
+        view_name='category-detail'
+    )
     class Meta:
         model = Bookitem
         fields = ['id','title','author','price','price_after_tax','category']
