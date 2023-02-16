@@ -12,8 +12,16 @@ from django.http import JsonResponse
 from django.forms.models import model_to_dict
 from .models import Category 
 from .serializers import CategorySerializer
+from rest_framework.renderers import TemplateHTMLRenderer, StaticHTMLRenderer
+from rest_framework.decorators import api_view, renderer_classes
 
 # Create your views here.
+
+@api_view(['GET'])
+@renderer_classes([StaticHTMLRenderer])
+def welcome(request):
+    data = '<html><body><h1>Welcome To Little Lemon API Project</h1></body></html>'
+    return Response(data)
 
 @api_view()
 def category_detail(request, pk):
@@ -40,6 +48,13 @@ def BookView(request):
 class SingleBookView(generics.RetrieveUpdateAPIView):
     queryset = Bookitem.objects.all()
     serializer_class = BookSerializer
+
+@api_view() 
+@renderer_classes ([TemplateHTMLRenderer])
+def Book(request):
+    items = Bookitem.objects.select_related('category').all()
+    serialized_item = BookSerializer(items, many=True)
+    return Response({'data':serialized_item.data}, template_name='book-item.html')
 
 # old ways of doing it
 @csrf_exempt
@@ -77,8 +92,8 @@ class BookList(APIView):
     def post(self, request): 
         return Response({"message":"new book created"}, status.HTTP_201_CREATED)
 
-class Book(APIView): 
-    def get(self, request, pk): 
-        return Response({"message":"single book with id " + str(pk)}, status.HTTP_200_OK)
-    def put(self, request, pk): 
-        return Response({"title":request.data.get('title')}, status.HTTP_200_OK)
+# class Book(APIView): 
+#     def get(self, request, pk): 
+#         return Response({"message":"single book with id " + str(pk)}, status.HTTP_200_OK)
+#     def put(self, request, pk): 
+#         return Response({"title":request.data.get('title')}, status.HTTP_200_OK)
