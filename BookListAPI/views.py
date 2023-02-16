@@ -32,13 +32,19 @@ class Book(APIView):
     def put(self, request, pk): 
         return Response({"title":request.data.get('title')}, status.HTTP_200_OK)
 
-class BookView(generics.ListCreateAPIView):
-    queryset = Bookitem.objects.all()
-    serializer_class = BookSerializer
+# class BookView(generics.ListCreateAPIView):
+#     queryset = Bookitem.objects.select_related('category').all()
+#     serializer_class = BookSerializer
 
 class SingleBookView(generics.RetrieveUpdateAPIView):
     queryset = Bookitem.objects.all()
     serializer_class = BookSerializer
+
+@api_view()
+def BookView(request): 
+    items = Bookitem.objects.select_related('category').all()
+    serialized_items = BookSerializer(items, many=True)
+    return Response(serialized_items.data)
     
 @csrf_exempt
 def books(request):

@@ -1,7 +1,20 @@
 from rest_framework import serializers
-from .models import Bookitem
+from decimal import Decimal
+from .models import Bookitem, Category
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id','title','slug']
 
 class BookSerializer(serializers.ModelSerializer):
+    # cost = serializers.IntegerField(source ='price')
+    price_after_tax = serializers.SerializerMethodField(method_name='calculate_tax')
+    category = CategorySerializer()
     class Meta:
         model = Bookitem
-        fields = ['id','title','author','price']
+        fields = ['id','title','author','price','price_after_tax','category']
+    
+    def calculate_tax(self, product:Bookitem): 
+        return product.price * Decimal(1.1)
+        
