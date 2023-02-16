@@ -19,6 +19,9 @@ class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookitem
         fields = ['id','title','author','price','price_after_tax','category','category_id']
+        extra_kwargs = {
+            'price': {'min_value': 2},
+        }
     
     def calculate_tax(self, product:Bookitem): 
         return product.price * Decimal(1.1)

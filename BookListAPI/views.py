@@ -29,23 +29,23 @@ def category_detail(request, pk):
     serialized_category = CategorySerializer(category)
     return Response(serialized_category.data) 
 
-# class BookView(generics.ListCreateAPIView):
-#     queryset = Bookitem.objects.select_related('category').all()
-#     serializer_class = BookSerializer
+class BookView(generics.ListCreateAPIView):
+    queryset = Bookitem.objects.select_related('category').all()
+    serializer_class = BookSerializer
 
-@api_view(['GET', 'POST'])
-def BookView(request): 
-    if request.method == 'GET':
-        items = Bookitem.objects.select_related('category').all()
-        serialized_items = BookSerializer(items, many=True, context={'request': request})
-        return Response(serialized_items.data)
-    if request.method == 'POST': 
-        serialized_items = BookSerializer(data=request.data)
-        serialized_items.is_valid(raise_exception=True)
-        serialized_items.save()
-        return Response(serialized_items.data, status=status.HTTP_201_CREATED)
+# @api_view(['GET', 'POST'])
+# def BookView(request): 
+#     if request.method == 'GET':
+#         items = Bookitem.objects.select_related('category').all()
+#         serialized_items = BookSerializer(items, many=True, context={'request': request})
+#         return Response(serialized_items.data)
+#     if request.method == 'POST': 
+#         serialized_items = BookSerializer(data=request.data)
+#         serialized_items.is_valid(raise_exception=True)
+#         serialized_items.save()
+#         return Response(serialized_items.data, status=status.HTTP_201_CREATED)
 
-class SingleBookView(generics.RetrieveUpdateAPIView):
+class SingleBookView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Bookitem.objects.all()
     serializer_class = BookSerializer
 
