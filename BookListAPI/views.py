@@ -29,21 +29,30 @@ def category_detail(request, pk):
     serialized_category = CategorySerializer(category)
     return Response(serialized_category.data) 
 
-class BookView(generics.ListCreateAPIView):
-    queryset = Bookitem.objects.select_related('category').all()
-    serializer_class = BookSerializer
+# class BookView(generics.ListCreateAPIView):
+#     queryset = Bookitem.objects.select_related('category').all()
+#     serializer_class = BookSerializer
 
-# @api_view(['GET', 'POST'])
-# def BookView(request): 
-#     if request.method == 'GET':
-#         items = Bookitem.objects.select_related('category').all()
-#         serialized_items = BookSerializer(items, many=True, context={'request': request})
-#         return Response(serialized_items.data)
-#     if request.method == 'POST': 
-#         serialized_items = BookSerializer(data=request.data)
-#         serialized_items.is_valid(raise_exception=True)
-#         serialized_items.save()
-#         return Response(serialized_items.data, status=status.HTTP_201_CREATED)
+@api_view(['GET', 'POST'])
+def BookView(request): 
+    if request.method == 'GET':
+        items = Bookitem.objects.select_related('category').all()
+        category_name = request.query_params.get('category')
+        to_price = request.query_params.get('to_price')
+        search = request.query_params.get('search')
+        if category_name: 
+            items = items.filter(category__title=category_name)
+        if to_price: 
+            items = items.filter(price__lte=to_price)
+        if search: 
+            items = items.filter(title__icontains=search)
+        serialized_items = BookSerializer(items, many=True, context={'request': request})
+        return Response(serialized_items.data)
+    if request.method == 'POST': 
+        serialized_items = BookSerializer(data=request.data)
+        serialized_items.is_valid(raise_exception=True)
+        serialized_items.save()
+        return Response(serialized_items.data, status=status.HTTP_201_CREATED)
 
 class SingleBookView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Bookitem.objects.all()
