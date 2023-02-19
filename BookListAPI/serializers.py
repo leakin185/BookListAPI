@@ -3,6 +3,7 @@ from decimal import Decimal
 from .models import Bookitem, Category
 from rest_framework.validators import UniqueValidator
 from rest_framework.validators import UniqueTogetherValidator
+import bleach
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,6 +19,11 @@ class BookSerializer(serializers.ModelSerializer):
     # )
     category = CategorySerializer(read_only=True)
     category_id = serializers.IntegerField(write_only=True)
+    def validate(self, attrs):
+        attrs['title'] = bleach.clean(attrs['title'])
+        if(attrs['price']<2):
+            raise serializers.ValidationError('Price should not be less than 2.0')
+        return super().validate(attrs)
     class Meta:
         model = Bookitem
         fields = ['id','title','author','price','price_after_tax','category','category_id']
