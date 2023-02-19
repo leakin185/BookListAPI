@@ -14,6 +14,7 @@ from .models import Category
 from .serializers import CategorySerializer
 from rest_framework.renderers import TemplateHTMLRenderer, StaticHTMLRenderer
 from rest_framework.decorators import api_view, renderer_classes
+from django.core.paginator import Paginator, EmptyPage
 
 # Create your views here.
 
@@ -41,6 +42,8 @@ def BookView(request):
         to_price = request.query_params.get('to_price')
         search = request.query_params.get('search')
         ordering = request.query_params.get('ordering')
+        perpage = request.query_params.get('perpage', default=2)
+        page = request.query_params.get('page', default=1)
         if category_name: 
             items = items.filter(category__title=category_name)
         if to_price: 
@@ -50,6 +53,11 @@ def BookView(request):
         if ordering: 
             ordering_fields = ordering.split(',')
             items = items.order_by(*ordering_fields)
+        paginator = Paginator(items, per_page=perpage)
+        try: 
+            items = paginator.page(number=page)
+        except EmptyPage: 
+            items = []
         serialized_items = BookSerializer(items, many=True, context={'request': request})
         return Response(serialized_items.data)
     if request.method == 'POST': 
