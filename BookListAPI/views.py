@@ -15,6 +15,7 @@ from .serializers import CategorySerializer
 from rest_framework.renderers import TemplateHTMLRenderer, StaticHTMLRenderer
 from rest_framework.decorators import api_view, renderer_classes
 from django.core.paginator import Paginator, EmptyPage
+from rest_framework import viewsets
 
 # Create your views here.
 
@@ -30,9 +31,11 @@ def category_detail(request, pk):
     serialized_category = CategorySerializer(category)
     return Response(serialized_category.data) 
 
-# class BookView(generics.ListCreateAPIView):
-#     queryset = Bookitem.objects.select_related('category').all()
-#     serializer_class = BookSerializer
+class BookViewVersion2(viewsets.ModelViewSet):
+    queryset = Bookitem.objects.select_related('category').all()
+    serializer_class = BookSerializer
+    ordering_fields=['price']
+    search_fields=['title','category__title']
 
 @api_view(['GET', 'POST'])
 def BookView(request): 
