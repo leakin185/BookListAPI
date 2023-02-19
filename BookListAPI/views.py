@@ -40,12 +40,16 @@ def BookView(request):
         category_name = request.query_params.get('category')
         to_price = request.query_params.get('to_price')
         search = request.query_params.get('search')
+        ordering = request.query_params.get('ordering')
         if category_name: 
             items = items.filter(category__title=category_name)
         if to_price: 
             items = items.filter(price__lte=to_price)
         if search: 
             items = items.filter(title__icontains=search)
+        if ordering: 
+            ordering_fields = ordering.split(',')
+            items = items.order_by(*ordering_fields)
         serialized_items = BookSerializer(items, many=True, context={'request': request})
         return Response(serialized_items.data)
     if request.method == 'POST': 
