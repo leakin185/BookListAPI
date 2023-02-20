@@ -37,10 +37,18 @@ def category_detail(request, pk):
     return Response(serialized_category.data) 
 
 class BookViewVersion2(viewsets.ModelViewSet):
+    # throttle_classes = [AnonRateThrottle, UserRateThrottle]
     queryset = Bookitem.objects.select_related('category').all()
     serializer_class = BookSerializer
     ordering_fields=['price']
     search_fields=['title','category__title']
+    # conditional throttling
+    def get_throttles(self):
+        if self.action == 'create':
+            throttle_classes = [UserRateThrottle]
+        else:
+            throttle_classes = []
+        return [throttle() for throttle in throttle_classes]
 
 @api_view(['GET', 'POST'])
 def BookView(request): 
