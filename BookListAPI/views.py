@@ -13,11 +13,14 @@ from django.forms.models import model_to_dict
 from .models import Category 
 from .serializers import CategorySerializer
 from rest_framework.renderers import TemplateHTMLRenderer, StaticHTMLRenderer
-from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.decorators import api_view, renderer_classes, throttle_classes
 from django.core.paginator import Paginator, EmptyPage
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+from rest_framework.throttling import AnonRateThrottle
+from rest_framework.throttling import UserRateThrottle
+from .throttles import TenCallsPerMinute
 
 # Create your views here.
 
@@ -94,6 +97,17 @@ def manager_view(request):
         return Response({'message':'only manager should see this'})
     else: 
         return Response({'message':'you are not authorized to see this'}, 403)
+
+@api_view()
+@throttle_classes([AnonRateThrottle])
+def throttle_check(request): 
+    return Response({'message':'successful'})
+
+@api_view()
+@permission_classes([IsAuthenticated])
+@throttle_classes([TenCallsPerMinute])
+def throttle_check_auth(request): 
+    return Response({'message':'successful for the logged in users only'})
 
 # old ways of doing it
 @csrf_exempt
