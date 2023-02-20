@@ -16,6 +16,8 @@ from rest_framework.renderers import TemplateHTMLRenderer, StaticHTMLRenderer
 from rest_framework.decorators import api_view, renderer_classes
 from django.core.paginator import Paginator, EmptyPage
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
 
 # Create your views here.
 
@@ -79,6 +81,11 @@ def Book(request):
     items = Bookitem.objects.select_related('category').all()
     serialized_item = BookSerializer(items, many=True)
     return Response({'data':serialized_item.data}, template_name='book-item.html')
+
+@api_view() 
+@permission_classes([IsAuthenticated])
+def secret(request):
+    return Response({'message':'secret message'})
 
 # old ways of doing it
 @csrf_exempt
