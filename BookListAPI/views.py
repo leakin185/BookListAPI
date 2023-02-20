@@ -87,6 +87,14 @@ def Book(request):
 def secret(request):
     return Response({'message':'secret message'})
 
+@api_view()
+@permission_classes([IsAuthenticated])
+def manager_view(request):
+    if request.user.groups.filter(name='Manager').exists():
+        return Response({'message':'only manager should see this'})
+    else: 
+        return Response({'message':'you are not authorized to see this'}, 403)
+
 # old ways of doing it
 @csrf_exempt
 def books(request):
