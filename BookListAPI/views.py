@@ -21,6 +21,8 @@ from rest_framework.decorators import permission_classes
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.throttling import UserRateThrottle
 from .throttles import TenCallsPerMinute
+from rest_framework.permissions import IsAdminUser
+from django.contrib.auth.models import User, Group
 
 # Create your views here.
 
@@ -116,6 +118,20 @@ def throttle_check(request):
 @throttle_classes([TenCallsPerMinute])
 def throttle_check_auth(request): 
     return Response({'message':'successful for the logged in users only'})
+
+@api_view(['POST','DELETE'])
+@permission_classes([IsAdminUser])
+def managers(request): 
+    username = request.data['username']
+    if username: 
+        user = get_object_or_404(User, username=username)
+        managers = Group.objects.get(name='Manager')
+        if request.method == 'POST': 
+            managers.user_set.add(user)
+        elif request.method == 'DELETE': 
+            managers.user_set.remove(user)
+        return Response({'message':'ok'})
+    return Response({"message":"error"}, status.HTTP_400_BAD_REQUEST)
 
 # old ways of doing it
 @csrf_exempt
